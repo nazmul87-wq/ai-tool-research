@@ -36,69 +36,260 @@ The output files follow a **fixed section order and heading shape** so that `git
 
 ---
 
-## Quick start
+## How to run
 
-### Cursor (recommended)
+The skill is designed to drop into any AI agent runtime that understands the [`agentskills.io`](https://agentskills.io) open `SKILL.md` standard, plus work as a pasted prompt in any chat UI.
+
+### Inputs the skill accepts
+
+Every invocation takes the same four inputs. You can pass them explicitly or let the skill infer defaults:
+
+| Input | Values | Default | Notes |
+|---|---|---|---|
+| `tool` | `claude` · `cursor` · `codex` · `gemini` · `openclaw` · `all` | — (required) | Which AI ecosystem to research |
+| `since_date` | `YYYY-MM-DD` | Last entry in `research-log.md`, or `today - 31 days` on first run | Lower bound of the research window |
+| `output_dir` | any path | Current working directory | Where the two output files land |
+| `existing_file_mode` | `rewrite` · `append-appendix` · `fail` | `append-appendix` if file exists, else `rewrite` | How to treat existing playbook / catalog |
+
+---
+
+### 1. Cursor (recommended — first-class support)
+
+#### Install
+
+**Project-local** (just this workspace):
+
+```powershell
+# Windows PowerShell — from the parent folder that contains ai-tool-research-skill
+New-Item -ItemType Directory -Force -Path .cursor\skills | Out-Null
+Copy-Item -Recurse -Force ai-tool-research-skill .cursor\skills\ai-tool-research
+```
 
 ```bash
-# Project-local
+# macOS / Linux
 mkdir -p .cursor/skills
 cp -r ai-tool-research-skill .cursor/skills/ai-tool-research
+```
 
-# OR personal (shared across all your Cursor projects)
+**Personal** (shared across every Cursor project on this machine):
+
+```powershell
+# Windows PowerShell
+New-Item -ItemType Directory -Force -Path $HOME\.cursor\skills | Out-Null
+Copy-Item -Recurse -Force ai-tool-research-skill $HOME\.cursor\skills\ai-tool-research
+```
+
+```bash
+# macOS / Linux
 mkdir -p ~/.cursor/skills
 cp -r ai-tool-research-skill ~/.cursor/skills/ai-tool-research
 ```
 
-Then ask Cursor:
+Reload Cursor (`Cmd/Ctrl+Shift+P` → **Developer: Reload Window**). The skill should appear under Settings → **Rules** → *Agent Decides*.
 
-> Run the ai-tool-research skill for Cursor this month.
+#### Invoke
 
-### Claude Desktop / Claude Code
+Ask Cursor in chat (Agent Mode preferred):
+
+```text
+Run the ai-tool-research skill for Cursor this month.
+```
+
+Or with explicit inputs:
+
+```text
+Run the ai-tool-research skill for Cursor with
+since_date = 2026-03-21 and existing_file_mode = append-appendix.
+```
+
+Cursor will:
+
+1. Read `SKILL.md` and the five support files on demand.
+2. Execute the 9-step workflow (confirm inputs → check existing files → research → rate → compose → verify → write → log).
+3. Write `Cursor-Productivity-Playbook.md` + `Cursor-Skills-Catalog.md` into `output_dir` and append a row to `research-log.md`.
+
+#### Recommended test run
+
+Confirms your setup works end-to-end on a small window:
+
+```text
+Run ai-tool-research for Cursor with since_date = 2026-04-14 and existing_file_mode = append-appendix.
+```
+
+You should see a short appendix added to both Cursor files plus a new row in `research-log.md`.
+
+---
+
+### 2. Claude Desktop / Claude Code
+
+#### Install
+
+```powershell
+# Windows PowerShell
+New-Item -ItemType Directory -Force -Path $HOME\.claude\skills | Out-Null
+Copy-Item -Recurse -Force ai-tool-research-skill $HOME\.claude\skills\ai-tool-research
+```
 
 ```bash
+# macOS / Linux
 mkdir -p ~/.claude/skills
 cp -r ai-tool-research-skill ~/.claude/skills/ai-tool-research
 ```
 
-Enable it in Settings → Skills, then ask:
+Open Claude Desktop → **Settings** → **Skills** → enable `ai-tool-research`.
 
-> Use the ai-tool-research skill to update the Codex playbook.
+#### Invoke
 
-### OpenAI Codex
+```text
+Use the ai-tool-research skill to update the Codex playbook for last month.
+```
+
+Or with explicit inputs:
+
+```text
+Use ai-tool-research for claude with since_date = 2026-03-21 and mode = rewrite.
+Output files to the current project folder.
+```
+
+---
+
+### 3. OpenAI Codex (CLI + IDE + App)
+
+#### Install
+
+```powershell
+# Windows PowerShell
+New-Item -ItemType Directory -Force -Path $HOME\.codex\skills | Out-Null
+Copy-Item -Recurse -Force ai-tool-research-skill $HOME\.codex\skills\ai-tool-research
+```
 
 ```bash
+# macOS / Linux
 mkdir -p ~/.codex/skills
 cp -r ai-tool-research-skill ~/.codex/skills/ai-tool-research
 ```
 
-Optionally reference it in `AGENTS.md` for auto-loading.
+Optionally reference it in your project's `AGENTS.md` for auto-loading:
 
-### Gemini CLI
+```markdown
+## Available skills
+- `ai-tool-research` — monthly regeneration of AI-tool playbooks + catalogs.
+```
+
+#### Invoke
+
+In the Codex CLI or IDE agent:
+
+```text
+Run ai-tool-research for codex this month.
+```
+
+---
+
+### 4. Gemini CLI / Gemini Code Assist
+
+#### Install
+
+```powershell
+# Windows PowerShell
+New-Item -ItemType Directory -Force -Path $HOME\.gemini\skills | Out-Null
+Copy-Item -Recurse -Force ai-tool-research-skill $HOME\.gemini\skills\ai-tool-research
+```
 
 ```bash
+# macOS / Linux
 mkdir -p ~/.gemini/skills
 cp -r ai-tool-research-skill ~/.gemini/skills/ai-tool-research
 ```
 
-### OpenClaw
+#### Invoke
+
+```text
+Run ai-tool-research for gemini with since_date = 2026-03-21.
+```
+
+---
+
+### 5. OpenClaw
+
+#### Install
+
+```powershell
+# Windows PowerShell
+New-Item -ItemType Directory -Force -Path $HOME\.openclaw\workspace\skills | Out-Null
+Copy-Item -Recurse -Force ai-tool-research-skill $HOME\.openclaw\workspace\skills\ai-tool-research
+```
 
 ```bash
+# macOS / Linux
 mkdir -p ~/.openclaw/workspace/skills
 cp -r ai-tool-research-skill ~/.openclaw/workspace/skills/ai-tool-research
 ```
 
-Then message your agent (on WhatsApp / Telegram / Slack):
+#### Invoke
 
-> Run the ai-tool-research skill for all five tools and DM me a summary.
+From any connected messaging channel (WhatsApp / Telegram / Slack / Signal / iMessage / Discord / MS Teams):
 
-### ChatGPT (web — no filesystem)
+```text
+Run the ai-tool-research skill for all five tools and DM me a summary.
+```
 
-1. Open a new conversation.
-2. Paste `SKILL.md` as the first message, prefixed with: *"You are an agent following this skill definition. Apply it to my next request."*
-3. Paste the five support files (`playbook-template.md`, `catalog-template.md`, `personas.md`, `rating-system.md`, `research-queries.md`) in follow-up turns.
-4. Ask: "Run it for Gemini this month."
-5. ChatGPT returns the two Markdown files as assistant messages; copy them into `.md` files locally.
+Because OpenClaw runs locally with filesystem access, it can write all ten output files in one pass — this is the fastest way to do a full monthly cycle unattended.
+
+---
+
+### 6. ChatGPT (web UI — no filesystem)
+
+ChatGPT can't install skills, but it can still follow the spec when pasted in.
+
+1. Start a new conversation.
+2. Paste `SKILL.md` as the first message, prefixed with:
+   > *You are an agent following this skill definition. Apply it to my next request.*
+3. In follow-up turns, paste each support file: `playbook-template.md`, `catalog-template.md`, `personas.md`, `rating-system.md`, `research-queries.md`.
+4. Ask:
+   ```text
+   Run the skill for Gemini this month. since_date = 2026-03-21. mode = rewrite.
+   ```
+5. ChatGPT will return the two Markdown files as assistant messages. Copy each into a local `.md` file manually.
+
+Note: ChatGPT's web search is less comprehensive than Cursor/Claude Desktop web tools — expect shallower coverage of forum threads and X posts.
+
+---
+
+### 7. Any other `SKILL.md`-aware runtime
+
+Anywhere else (generic MCP client, a custom agent you wrote, a third-party IDE plugin that supports `agentskills.io`):
+
+1. Drop the `ai-tool-research-skill` folder somewhere the runtime scans for skills.
+2. Invoke by name: `ai-tool-research`.
+3. Pass the four inputs (`tool`, `since_date`, `output_dir`, `existing_file_mode`) in whatever way your runtime accepts them.
+
+---
+
+### What you'll see during a run
+
+A successful run produces exactly these artifacts:
+
+```text
+<output_dir>/
+├── <Tool>-Productivity-Playbook.md    ← new or appended
+├── <Tool>-Skills-Catalog.md           ← new or appended
+└── research-log.md                    ← new row appended
+```
+
+And a short chat summary with: date run, tool, `since_date`, mode, count of new skills / new use cases, and 1–3 notable changes in the window.
+
+---
+
+### Troubleshooting
+
+| Symptom | Fix |
+|---|---|
+| Skill doesn't appear in Cursor's Rules panel | Reload window (`Cmd/Ctrl+Shift+P` → *Developer: Reload Window*) after copying the folder. |
+| Claude Desktop says "skill not found" | Skills must be explicitly enabled in *Settings → Skills*. Toggle it on. |
+| Agent produces generic content, not recent | Your `since_date` is probably too wide. Tighten it (e.g. last 30 days). Also confirm your runtime has web search enabled. |
+| Output files clobbered when you wanted to keep history | Use `existing_file_mode = append-appendix`. The default behavior is `append-appendix` when files exist, but some agents pick `rewrite` — be explicit. |
+| `research-log.md` not updating | The skill appends to whatever `output_dir` you passed. Check it landed there, not in the skill folder itself. |
 
 ---
 
